@@ -18,6 +18,9 @@ const Index = () => {
     setConsoleLogs(prev => [...prev, { message: `[${timestamp}] ${message}`, type }]);
   }, []);
 
+  // Message queue for unsent messages
+  const [messageQueue, setMessageQueue] = useState<Message[]>([]);
+
   // Simulate C backend function: enqueue message with priority
   const sendMessage = useCallback((text: string, type: "normal" | "urgent") => {
     const newMessage: Message = {
@@ -29,8 +32,8 @@ const Index = () => {
       status: "sent",
     };
     
-    setMessages(prev => [...prev, newMessage]);
-    addLog(`✅ ${type === "urgent" ? "Urgent" : "Normal"} message sent: "${text}"`, "success");
+    setMessageQueue(prev => [...prev, newMessage]);
+    addLog(`✅ ${type === "urgent" ? "Urgent" : "Normal"} message queued: "${text}"`, "success");
     
     toast({
       title: "Message Sent",
@@ -40,9 +43,7 @@ const Index = () => {
 
   // Simulate C backend function: dequeue message with priority (urgent first)
   const receiveMessage = useCallback(() => {
-    const availableMessages = messages.filter(m => !m.isDeleted);
-    
-    if (availableMessages.length === 0) {
+    if (messageQueue.length === 0) {
       addLog("❌ No messages to receive", "warning");
       toast({
         title: "No Messages",
@@ -53,18 +54,17 @@ const Index = () => {
     }
 
     // Priority dequeue: urgent messages first, then normal by timestamp
-    const sortedMessages = [...availableMessages].sort((a, b) => {
+    const sortedQueue = [...messageQueue].sort((a, b) => {
       if (a.type === "urgent" && b.type === "normal") return -1;
       if (a.type === "normal" && b.type === "urgent") return 1;
       return a.timestamp.getTime() - b.timestamp.getTime();
     });
 
-    const messageToReceive = sortedMessages[0];
+    const messageToReceive = sortedQueue[0];
     
-    // Update message status to received
-    setMessages(prev => 
-      prev.map(m => m.id === messageToReceive.id ? { ...m, status: "received" as const } : m)
-    );
+    // Remove from queue and add to chat with received status
+    setMessageQueue(prev => prev.filter(m => m.id !== messageToReceive.id));
+    setMessages(prev => [...prev, { ...messageToReceive, status: "received" as const }]);
     
     addLog(`✅ ${messageToReceive.type === "urgent" ? "Urgent message received first" : "Message received"}: "${messageToReceive.text}"`, "success");
     
@@ -72,7 +72,7 @@ const Index = () => {
       title: "Message Received",
       description: `Received: "${messageToReceive.text}"`,
     });
-  }, [messages, addLog, toast]);
+  }, [messageQueue, addLog, toast]);
 
   // Simulate C backend function: push message to stack for deletion
   const deleteMessage = useCallback((id: string) => {
