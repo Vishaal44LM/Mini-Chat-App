@@ -8,35 +8,47 @@ All colors MUST be HSL.
 
 @layer base {
   :root {
-    --background: 0 0% 100%;
-    --foreground: 222.2 84% 4.9%;
+    /* WhatsApp-inspired Dark Theme */
+    --background: 222 14% 8%;
+    --foreground: 210 20% 98%;
 
-    --card: 0 0% 100%;
-    --card-foreground: 222.2 84% 4.9%;
+    --chat-bg: 220 13% 9%;
+    --chat-header: 222 14% 12%;
+    --chat-panel: 220 13% 11%;
 
-    --popover: 0 0% 100%;
-    --popover-foreground: 222.2 84% 4.9%;
+    --card: 220 13% 11%;
+    --card-foreground: 210 20% 98%;
 
-    --primary: 222.2 47.4% 11.2%;
-    --primary-foreground: 210 40% 98%;
+    --popover: 220 13% 11%;
+    --popover-foreground: 210 20% 98%;
 
-    --secondary: 210 40% 96.1%;
-    --secondary-foreground: 222.2 47.4% 11.2%;
+    --primary: 142 76% 36%;
+    --primary-foreground: 210 20% 98%;
 
-    --muted: 210 40% 96.1%;
-    --muted-foreground: 215.4 16.3% 46.9%;
+    --secondary: 220 13% 16%;
+    --secondary-foreground: 210 20% 98%;
 
-    --accent: 210 40% 96.1%;
-    --accent-foreground: 222.2 47.4% 11.2%;
+    --muted: 220 13% 16%;
+    --muted-foreground: 215 20% 65%;
 
-    --destructive: 0 84.2% 60.2%;
-    --destructive-foreground: 210 40% 98%;
+    --accent: 220 13% 16%;
+    --accent-foreground: 210 20% 98%;
 
-    --border: 214.3 31.8% 91.4%;
-    --input: 214.3 31.8% 91.4%;
-    --ring: 222.2 84% 4.9%;
+    --destructive: 0 84% 60%;
+    --destructive-foreground: 210 20% 98%;
 
-    --radius: 0.5rem;
+    --urgent: 0 84% 60%;
+    --urgent-foreground: 210 20% 98%;
+
+    --normal-message: 142 76% 36%;
+    --urgent-message: 0 84% 60%;
+    --deleted-message: 215 20% 35%;
+
+    --border: 220 13% 20%;
+    --input: 220 13% 16%;
+    --ring: 142 76% 36%;
+
+    --radius: 0.75rem;
 
     --sidebar-background: 0 0% 98%;
 
@@ -101,5 +113,61 @@ All colors MUST be HSL.
 
   body {
     @apply bg-background text-foreground;
+  }
+}
+
+/* Chat animations and utilities */
+@layer utilities {
+  .message-enter {
+    animation: messageSlideIn 0.3s ease-out;
+  }
+  
+  .message-exit {
+    animation: messageSlideOut 0.3s ease-out;
+  }
+  
+  .message-deleted {
+    @apply opacity-50 scale-95;
+    transition: all 0.3s ease-out;
+  }
+  
+  .chat-scrollbar::-webkit-scrollbar {
+    width: 6px;
+  }
+  
+  .chat-scrollbar::-webkit-scrollbar-track {
+    background: hsl(var(--muted));
+    border-radius: var(--radius);
+  }
+  
+  .chat-scrollbar::-webkit-scrollbar-thumb {
+    background: hsl(var(--muted-foreground));
+    border-radius: var(--radius);
+  }
+  
+  .chat-scrollbar::-webkit-scrollbar-thumb:hover {
+    background: hsl(var(--accent-foreground));
+  }
+}
+
+@keyframes messageSlideIn {
+  from {
+    opacity: 0;
+    transform: translateY(10px) scale(0.95);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
+}
+
+@keyframes messageSlideOut {
+  from {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
+  to {
+    opacity: 0;
+    transform: translateY(-10px) scale(0.95);
   }
 }
