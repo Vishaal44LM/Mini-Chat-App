@@ -2,7 +2,7 @@ import { Card, CardContent } from "@/components/ui/card";
 import { Terminal } from "lucide-react";
 
 interface ConsoleLogProps {
-  logs: string[];
+  logs: { message: string; type: "success" | "info" | "warning" }[];
 }
 
 export const ConsoleLog = ({ logs }: ConsoleLogProps) => {
@@ -18,8 +18,12 @@ export const ConsoleLog = ({ logs }: ConsoleLogProps) => {
             <p className="text-xs text-muted-foreground">No recent activity</p>
           ) : (
             logs.slice(-3).map((log, index) => (
-              <p key={index} className="text-xs text-muted-foreground font-mono">
-                {log}
+              <p key={index} className={`text-xs font-mono ${
+                log.type === "success" ? "text-primary" :
+                log.type === "warning" ? "text-destructive" :
+                "text-muted-foreground"
+              }`}>
+                {log.message}
               </p>
             ))
           )}

@@ -2,6 +2,7 @@ import { useState, useCallback } from "react";
 import { ChatDisplay } from "@/components/ChatDisplay";
 import { MessageControls } from "@/components/MessageControls";  
 import { ConsoleLog } from "@/components/ConsoleLog";
+import { DeletedMessagesPanel } from "@/components/DeletedMessagesPanel";
 import { Message } from "@/components/ChatMessage";
 import { useToast } from "@/hooks/use-toast";
 
@@ -9,12 +10,12 @@ const Index = () => {
   const [messages, setMessages] = useState<Message[]>([]);
   const [selectedMessageId, setSelectedMessageId] = useState<string | null>(null);
   const [deletedStack, setDeletedStack] = useState<Message[]>([]);
-  const [consoleLogs, setConsoleLogs] = useState<string[]>([]);
+  const [consoleLogs, setConsoleLogs] = useState<{ message: string; type: "success" | "info" | "warning" }[]>([]);
   const { toast } = useToast();
 
-  const addLog = useCallback((message: string) => {
+  const addLog = useCallback((message: string, type: "success" | "info" | "warning" = "info") => {
     const timestamp = new Date().toLocaleTimeString();
-    setConsoleLogs(prev => [...prev, `[${timestamp}] ${message}`]);
+    setConsoleLogs(prev => [...prev, { message: `[${timestamp}] ${message}`, type }]);
   }, []);
 
   // Simulate C backend function: enqueue message with priority
@@ -25,10 +26,11 @@ const Index = () => {
       type,
       timestamp: new Date(),
       isDeleted: false,
+      status: "sent",
     };
     
     setMessages(prev => [...prev, newMessage]);
-    addLog(`Message enqueued: "${text}" (${type})`);
+    addLog(`✅ ${type === "urgent" ? "Urgent" : "Normal"} message sent: "${text}"`, "success");
     
     toast({
       title: "Message Sent",
@@ -41,7 +43,7 @@ const Index = () => {
     const availableMessages = messages.filter(m => !m.isDeleted);
     
     if (availableMessages.length === 0) {
-      addLog("No messages to receive");
+      addLog("❌ No messages to receive", "warning");
       toast({
         title: "No Messages",
         description: "Queue is empty",
@@ -58,7 +60,13 @@ const Index = () => {
     });
 
     const messageToReceive = sortedMessages[0];
-    addLog(`Message dequeued: "${messageToReceive.text}" (${messageToReceive.type})`);
+    
+    // Update message status to received
+    setMessages(prev => 
+      prev.map(m => m.id === messageToReceive.id ? { ...m, status: "received" as const } : m)
+    );
+    
+    addLog(`✅ ${messageToReceive.type === "urgent" ? "Urgent message received first" : "Message received"}: "${messageToReceive.text}"`, "success");
     
     toast({
       title: "Message Received",
@@ -72,11 +80,11 @@ const Index = () => {
     if (!messageToDelete) return;
 
     setMessages(prev => 
-      prev.map(m => m.id === id ? { ...m, isDeleted: true } : m)
+      prev.map(m => m.id === id ? { ...m, isDeleted: true, status: "deleted" as const } : m)
     );
     
     setDeletedStack(prev => [messageToDelete, ...prev]);
-    addLog(`Message deleted and pushed to stack: "${messageToDelete.text}"`);
+    addLog(`🗑 Message deleted and stored for undo: "${messageToDelete.text}"`, "warning");
     
     toast({
       title: "Message Deleted",
@@ -87,7 +95,7 @@ const Index = () => {
   // Simulate C backend function: pop message from stack to restore
   const undoDelete = useCallback(() => {
     if (deletedStack.length === 0) {
-      addLog("No messages to restore");
+      addLog("❌ No messages to restore", "warning");
       toast({
         title: "No Undo Available",
         description: "Undo stack is empty",
@@ -98,11 +106,11 @@ const Index = () => {
 
     const messageToRestore = deletedStack[0];
     setMessages(prev => 
-      prev.map(m => m.id === messageToRestore.id ? { ...m, isDeleted: false } : m)
+      prev.map(m => m.id === messageToRestore.id ? { ...m, isDeleted: false, status: "sent" as const } : m)
     );
     
     setDeletedStack(prev => prev.slice(1));
-    addLog(`Message restored from stack: "${messageToRestore.text}"`);
+    addLog(`🔄 Undo performed → message restored: "${messageToRestore.text}"`, "success");
     
     toast({
       title: "Message Restored",
@@ -121,7 +129,7 @@ const Index = () => {
     <div className="min-h-screen bg-chat-bg">
       <div className="container mx-auto p-4 h-screen flex flex-col gap-4">
         {/* Main Chat Interface */}
-        <div className="flex-1 grid grid-cols-1 lg:grid-cols-3 gap-4 min-h-0">
+        <div className="flex-1 grid grid-cols-1 lg:grid-cols-4 gap-4 min-h-0">
           {/* Chat Display - Left Panel */}
           <div className="lg:col-span-2 min-h-0">
             <ChatDisplay
@@ -132,7 +140,7 @@ const Index = () => {
             />
           </div>
 
-          {/* Message Controls - Right Panel */}
+          {/* Message Controls - Center Panel */}
           <div className="min-h-0">
             <MessageControls
               onSendMessage={sendMessage}
@@ -141,6 +149,14 @@ const Index = () => {
               onUndoDelete={undoDelete}
               selectedMessageId={selectedMessageId}
               canUndo={deletedStack.length > 0}
+            />
+          </div>
+
+          {/* Deleted Messages Panel - Right Panel */}
+          <div className="min-h-0">
+            <DeletedMessagesPanel
+              deletedMessages={deletedStack}
+              onUndoDelete={undoDelete}
             />
           </div>
         </div>

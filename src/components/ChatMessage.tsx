@@ -6,6 +6,7 @@ export interface Message {
   type: "normal" | "urgent";
   timestamp: Date;
   isDeleted?: boolean;
+  status: "sent" | "received" | "deleted";
 }
 
 interface ChatMessageProps {
@@ -43,18 +44,30 @@ export const ChatMessage = ({ message, onDelete, isSelected, onSelect }: ChatMes
           message.isDeleted && "opacity-50"
         )}
       >
-        <p className="text-sm leading-relaxed break-words">
-          {message.text}
-        </p>
+        <div className="flex items-start gap-2">
+          <p className="text-sm leading-relaxed break-words flex-1">
+            {message.text}
+          </p>
+          {message.type === "urgent" && (
+            <span className="text-xs">🔥</span>
+          )}
+        </div>
         <div className="flex items-center justify-between mt-1 gap-2">
           <span className="text-xs opacity-75">
             {formatTime(message.timestamp)}
           </span>
-          {message.type === "urgent" && (
-            <span className="text-xs bg-white/20 px-1.5 py-0.5 rounded text-white">
-              Urgent
+          <div className="flex items-center gap-1">
+            {message.type === "urgent" && (
+              <span className="text-xs bg-white/20 px-1.5 py-0.5 rounded text-white">
+                Urgent
+              </span>
+            )}
+            <span className="text-xs opacity-75">
+              {message.status === "sent" && "✔"}
+              {message.status === "received" && "✔✔"}
+              {message.status === "deleted" && "🗑"}
             </span>
-          )}
+          </div>
         </div>
         
         {/* Delete button on hover */}
