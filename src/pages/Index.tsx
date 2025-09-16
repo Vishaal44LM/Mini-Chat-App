@@ -3,6 +3,7 @@ import { ChatDisplay } from "@/components/ChatDisplay";
 import { MessageControls } from "@/components/MessageControls";  
 import { ConsoleLog } from "@/components/ConsoleLog";
 import { DeletedMessagesPanel } from "@/components/DeletedMessagesPanel";
+import { ChatMembers, ChatMember } from "@/components/ChatMembers";
 import { Message } from "@/components/ChatMessage";
 import { useToast } from "@/hooks/use-toast";
 
@@ -12,6 +13,16 @@ const Index = () => {
   const [deletedStack, setDeletedStack] = useState<Message[]>([]);
   const [consoleLogs, setConsoleLogs] = useState<{ message: string; type: "success" | "info" | "warning" }[]>([]);
   const { toast } = useToast();
+
+  // Chat Members
+  const [members] = useState<ChatMember[]>([
+    { id: "1", name: "Alice Johnson", status: "online", unreadCount: 2 },
+    { id: "2", name: "Bob Smith", status: "online", unreadCount: 0 },
+    { id: "3", name: "Carol Davis", status: "offline", unreadCount: 1 },
+    { id: "4", name: "David Wilson", status: "online", unreadCount: 0 },
+    { id: "5", name: "Emma Brown", status: "offline", unreadCount: 3 },
+  ]);
+  const [selectedMemberId, setSelectedMemberId] = useState<string>("1");
 
   const addLog = useCallback((message: string, type: "success" | "info" | "warning" = "info") => {
     const timestamp = new Date().toLocaleTimeString();
@@ -129,9 +140,17 @@ const Index = () => {
     <div className="min-h-screen bg-chat-bg">
       <div className="container mx-auto p-2 sm:p-4 h-screen flex flex-col gap-2 sm:gap-4">
         {/* Main Chat Interface */}
-        <div className="flex-1 flex flex-col lg:grid lg:grid-cols-4 gap-2 sm:gap-4 min-h-0">
+        <div className="flex-1 flex flex-col lg:grid lg:grid-cols-5 gap-2 sm:gap-4 min-h-0">
+          {/* Chat Members - Desktop: Left, Mobile: Top */}
+          <div className="h-48 lg:h-auto lg:min-h-0 order-1 lg:order-1">
+            <ChatMembers
+              members={members}
+              selectedMemberId={selectedMemberId}
+              onSelectMember={setSelectedMemberId}
+            />
+          </div>
           {/* Chat Display - Main Panel */}
-          <div className="flex-1 lg:col-span-2 min-h-0 order-1 lg:order-1">
+          <div className="flex-1 lg:col-span-2 min-h-0 order-2 lg:order-2">
             <ChatDisplay
               messages={messages}
               onDeleteMessage={deleteMessage}
@@ -140,8 +159,8 @@ const Index = () => {
             />
           </div>
 
-          {/* Message Controls - Mobile: Top, Desktop: Center */}
-          <div className="h-auto lg:min-h-0 order-2 lg:order-2">
+          {/* Message Controls - Mobile: Center, Desktop: Center */}
+          <div className="h-auto min-h-[400px] lg:min-h-0 order-3 lg:order-3">
             <MessageControls
               onSendMessage={sendMessage}
               onReceiveMessage={receiveMessage}
@@ -153,7 +172,7 @@ const Index = () => {
           </div>
 
           {/* Deleted Messages Panel - Desktop: Right, Mobile: Hidden in drawer */}
-          <div className="hidden lg:block lg:min-h-0 order-3 lg:order-3">
+          <div className="hidden lg:block lg:min-h-0 order-4 lg:order-4">
             <DeletedMessagesPanel
               deletedMessages={deletedStack}
               onUndoDelete={undoDelete}
@@ -161,7 +180,7 @@ const Index = () => {
           </div>
 
           {/* Mobile Deleted Messages - Compact version */}
-          <div className="block lg:hidden h-auto order-4">
+          <div className="block lg:hidden h-auto order-5">
             <div className="bg-chat-panel rounded-lg p-3">
               <div className="flex items-center justify-between mb-2">
                 <h3 className="text-sm font-medium text-foreground">Deleted ({deletedStack.length})</h3>
