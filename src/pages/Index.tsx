@@ -136,18 +136,17 @@ const Index = () => {
 
   return (
     <div className="min-h-screen bg-chat-bg">
-      <div className="container mx-auto p-2 sm:p-4 h-screen flex flex-col gap-2 sm:gap-4 max-w-7xl">
+      <div className="container mx-auto p-2 sm:p-4 h-screen flex flex-col gap-2 sm:gap-4">
         {/* Main Chat Interface */}
-        <div className="flex-1 flex flex-col lg:grid lg:grid-cols-4 gap-2 sm:gap-4 min-h-0">
+        <div className="flex-1 flex flex-col lg:grid lg:grid-cols-5 gap-2 sm:gap-4 min-h-0">
           {/* Chat Members - Desktop: Left, Mobile: Top */}
-          <div className="h-32 sm:h-40 lg:h-auto lg:min-h-0 order-1 lg:order-1">
+          <div className="h-48 lg:h-auto lg:min-h-0 order-1 lg:order-1">
             <ChatMembers
               members={members}
               selectedMemberId={selectedMemberId}
               onSelectMember={setSelectedMemberId}
             />
           </div>
-          
           {/* Chat Display - Main Panel */}
           <div className="flex-1 lg:col-span-2 min-h-0 order-2 lg:order-2">
             <ChatDisplay
@@ -158,53 +157,47 @@ const Index = () => {
             />
           </div>
 
-          {/* Message Controls & Deleted Messages - Mobile: Stack vertically, Desktop: Right column */}
-          <div className="flex flex-col gap-2 lg:min-h-0 order-3 lg:order-3">
-            {/* Message Controls */}
-            <div className="min-h-[300px] sm:min-h-[350px] lg:min-h-0 lg:flex-1">
-              <MessageControls
-                onSendMessage={sendMessage}
-                onReceiveMessage={receiveMessage}
-                onDeleteSelected={handleDeleteSelected}
-                onUndoDelete={undoDelete}
-                selectedMessageId={selectedMessageId}
-                canUndo={deletedStack.length > 0}
-              />
-            </div>
+          {/* Message Controls - Mobile: Center, Desktop: Center */}
+          <div className="h-auto min-h-[400px] lg:min-h-0 order-3 lg:order-3">
+            <MessageControls
+              onSendMessage={sendMessage}
+              onReceiveMessage={receiveMessage}
+              onDeleteSelected={handleDeleteSelected}
+              onUndoDelete={undoDelete}
+              selectedMessageId={selectedMessageId}
+              canUndo={deletedStack.length > 0}
+            />
+          </div>
 
-            {/* Deleted Messages Panel - Always visible but compact on mobile */}
-            <div className="lg:flex-1">
-              <div className="lg:hidden">
-                {/* Mobile Compact Version */}
-                <div className="bg-chat-panel rounded-lg p-3 border border-border">
-                  <div className="flex items-center justify-between mb-2">
-                    <h3 className="text-sm font-medium text-foreground">Deleted ({deletedStack.length})</h3>
-                    {deletedStack.length > 0 && (
-                      <button
-                        onClick={undoDelete}
-                        className="text-xs bg-accent text-accent-foreground px-2 py-1 rounded hover:bg-accent/80 transition-colors"
-                      >
-                        Undo Last
-                      </button>
-                    )}
-                  </div>
-                  {deletedStack.length === 0 ? (
-                    <p className="text-xs text-muted-foreground">No deleted messages</p>
-                  ) : (
-                    <p className="text-xs text-muted-foreground">
-                      Last: "{deletedStack[0]?.text?.substring(0, 30)}{deletedStack[0]?.text?.length > 30 ? '...' : ''}"
-                    </p>
-                  )}
-                </div>
+          {/* Deleted Messages Panel - Desktop: Right, Mobile: Hidden in drawer */}
+          <div className="hidden lg:block lg:min-h-0 order-4 lg:order-4">
+            <DeletedMessagesPanel
+              deletedMessages={deletedStack}
+              onUndoDelete={undoDelete}
+            />
+          </div>
+
+          {/* Mobile Deleted Messages - Compact version */}
+          <div className="block lg:hidden h-auto order-5">
+            <div className="bg-chat-panel rounded-lg p-3">
+              <div className="flex items-center justify-between mb-2">
+                <h3 className="text-sm font-medium text-foreground">Deleted ({deletedStack.length})</h3>
+                {deletedStack.length > 0 && (
+                  <button
+                    onClick={undoDelete}
+                    className="text-xs bg-accent text-accent-foreground px-2 py-1 rounded hover:bg-accent/80 transition-colors"
+                  >
+                    Undo Last
+                  </button>
+                )}
               </div>
-              
-              {/* Desktop Full Version */}
-              <div className="hidden lg:block h-full">
-                <DeletedMessagesPanel
-                  deletedMessages={deletedStack}
-                  onUndoDelete={undoDelete}
-                />
-              </div>
+              {deletedStack.length === 0 ? (
+                <p className="text-xs text-muted-foreground">No deleted messages</p>
+              ) : (
+                <p className="text-xs text-muted-foreground">
+                  Last: "{deletedStack[0]?.text?.substring(0, 30)}{deletedStack[0]?.text?.length > 30 ? '...' : ''}"
+                </p>
+              )}
             </div>
           </div>
         </div>
