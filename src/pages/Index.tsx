@@ -127,11 +127,11 @@ const Index = () => {
 
   return (
     <div className="min-h-screen bg-chat-bg">
-      <div className="container mx-auto p-4 h-screen flex flex-col gap-4">
+      <div className="container mx-auto p-2 sm:p-4 h-screen flex flex-col gap-2 sm:gap-4">
         {/* Main Chat Interface */}
-        <div className="flex-1 grid grid-cols-1 lg:grid-cols-4 gap-4 min-h-0">
-          {/* Chat Display - Left Panel */}
-          <div className="lg:col-span-2 min-h-0">
+        <div className="flex-1 flex flex-col lg:grid lg:grid-cols-4 gap-2 sm:gap-4 min-h-0">
+          {/* Chat Display - Main Panel */}
+          <div className="flex-1 lg:col-span-2 min-h-0 order-1 lg:order-1">
             <ChatDisplay
               messages={messages}
               onDeleteMessage={deleteMessage}
@@ -140,8 +140,8 @@ const Index = () => {
             />
           </div>
 
-          {/* Message Controls - Center Panel */}
-          <div className="min-h-0">
+          {/* Message Controls - Mobile: Top, Desktop: Center */}
+          <div className="h-auto lg:min-h-0 order-2 lg:order-2">
             <MessageControls
               onSendMessage={sendMessage}
               onReceiveMessage={receiveMessage}
@@ -152,17 +152,41 @@ const Index = () => {
             />
           </div>
 
-          {/* Deleted Messages Panel - Right Panel */}
-          <div className="min-h-0">
+          {/* Deleted Messages Panel - Desktop: Right, Mobile: Hidden in drawer */}
+          <div className="hidden lg:block lg:min-h-0 order-3 lg:order-3">
             <DeletedMessagesPanel
               deletedMessages={deletedStack}
               onUndoDelete={undoDelete}
             />
           </div>
+
+          {/* Mobile Deleted Messages - Compact version */}
+          <div className="block lg:hidden h-auto order-4">
+            <div className="bg-chat-panel rounded-lg p-3">
+              <div className="flex items-center justify-between mb-2">
+                <h3 className="text-sm font-medium text-foreground">Deleted ({deletedStack.length})</h3>
+                {deletedStack.length > 0 && (
+                  <button
+                    onClick={undoDelete}
+                    className="text-xs bg-accent text-accent-foreground px-2 py-1 rounded hover:bg-accent/80 transition-colors"
+                  >
+                    Undo Last
+                  </button>
+                )}
+              </div>
+              {deletedStack.length === 0 ? (
+                <p className="text-xs text-muted-foreground">No deleted messages</p>
+              ) : (
+                <p className="text-xs text-muted-foreground">
+                  Last: "{deletedStack[0]?.text?.substring(0, 30)}{deletedStack[0]?.text?.length > 30 ? '...' : ''}"
+                </p>
+              )}
+            </div>
+          </div>
         </div>
 
         {/* Console Log - Bottom */}
-        <div className="h-24 flex-shrink-0">
+        <div className="h-16 sm:h-24 flex-shrink-0">
           <ConsoleLog logs={consoleLogs} />
         </div>
       </div>
