@@ -16,11 +16,9 @@ const Index = () => {
 
   // Chat Members
   const [members] = useState<ChatMember[]>([
-    { id: "1", name: "Alice Johnson", status: "online", unreadCount: 2 },
-    { id: "2", name: "Bob Smith", status: "online", unreadCount: 0 },
-    { id: "3", name: "Carol Davis", status: "offline", unreadCount: 1 },
-    { id: "4", name: "David Wilson", status: "online", unreadCount: 0 },
-    { id: "5", name: "Emma Brown", status: "offline", unreadCount: 3 },
+    { id: "1", name: "Akash", status: "online", unreadCount: 0 },
+    { id: "2", name: "Vishaal", status: "online", unreadCount: 0 },
+    { id: "3", name: "Ulaganathan", status: "online", unreadCount: 0 },
   ]);
   const [selectedMemberId, setSelectedMemberId] = useState<string>("1");
 
